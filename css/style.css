@@ -99,6 +99,7 @@ table.result {
     width: 100%;
 }
 th.result {
+    background-color: #000;
     color: #ddd5d5;
     padding: 5px;
     text-align: left;

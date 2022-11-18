@@ -180,6 +180,9 @@ if ($db_name == "") {
                         if ($numRows > 0) {
                             $table = "";
                             showTable($table, $numCols, $numRows, $result);
+                        } else {
+                            echo "<br>Rows:" . $numRows . ",Col:" . $numCols;
+                            echo "<br><br>";
                         }
                     }
                 }
