@@ -3,10 +3,10 @@
  *  pit - 14 nov 2022  - 11:22:00
 -->
 <?php
-//error_reporting(E_ALL);
-error_reporting(0);
+error_reporting(E_ALL);
+//error_reporting(0);
 $root = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
-$db_name = filter_input(INPUT_GET, 'dbname', FILTER_SANITIZE_URL);
+$db_name = filter_input(INPUT_GET, 'dbname', FILTER_DEFAULT);
 $table = filter_input(INPUT_POST, 'table', FILTER_DEFAULT);
 $query = filter_input(INPUT_POST, 'query', FILTER_DEFAULT);
 $limit = filter_input(INPUT_POST, 'limit', FILTER_DEFAULT);
@@ -27,9 +27,8 @@ if ($db_name == "") {
             <h1>SQLite management</h1>
             <?php
             if ($db_name != "") {
-                $handle = fopen($db_name, 'r');
-                if (!$handle) {
-                    //$db_name = ""; // activated for not create db
+                if (!file_exists($db_name)) {
+                    $db_name = ""; // activated for not create db
                     if ($db_name != "") {
                         ?>
                         <script>
@@ -37,8 +36,15 @@ if ($db_name == "") {
                         </script>
                         <?php
                     }
+                } else {
+                    if (!is_writable($db_name)) {
+                        ?>
+                        <script>
+                            alert("Database is not writable!");
+                        </script>
+                        <?php
+                    }
                 }
-                $handle = null;
             }
             if ($db_name == "" && $table == "") {
                 ?>
@@ -51,7 +57,7 @@ if ($db_name == "") {
             }
             ?>
             <form name="close" action="<?php echo $root; ?>" method="get">
-                <input type="submit" title="Close database" class="button1" value="Close database">
+                <input type="submit" title="Refresh database" class="button1" value="Refresh database">
             </form> 
             <h2>Database: <?php echo $db_name; ?></h2>
             <?php
@@ -67,7 +73,7 @@ if ($db_name == "") {
                 if ($table == "") {
                     echo "<h2>Tables founds</h2>";
                     $sql = "SELECT name FROM sqlite_schema WHERE type='table' ORDER BY name;";
-                    $stm = $db->query($sql);
+                    $stm = pdoQuery($sql);
                     $result = $stm->fetchAll(PDO::FETCH_ASSOC);
                     $numCols = $stm->columnCount();
                     $numRows = count($result);
@@ -184,6 +190,7 @@ if ($db_name == "") {
 </html>
 
 <?php
+
 function showTable($tbname, $numCols, $numRows, $result) {
     if ($numRows != 0 && $numCols != 0) {
         echo "<br>$tbname Rows:" . $numRows . ",Col:" . $numCols;
@@ -239,4 +246,22 @@ function showTable($tbname, $numCols, $numRows, $result) {
     } else {
         echo "<div> Rows not found!</div>";
     }
+}
+
+/**
+ * Execute a query
+ * @param type $sql
+ * @return PDO Statement object
+ */
+function pdoQuery($sql) {
+    global $db;
+    try {
+        $stm = $db->query($sql);
+    } catch (PDOException $e) {
+        $ainfo = $e->errorInfo;
+        $desc = $ainfo[1] . " " . $ainfo[2];
+        echo '<br>' . $desc;
+        die;
+    }
+    return $stm;
 }
