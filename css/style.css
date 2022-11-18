@@ -108,6 +108,7 @@ td.result {
     border: 1px solid #939393;
     padding: 3px;
     text-align: left;
+    word-break: break-word;
 }
 table.result tr:nth-child(odd) td{
     background-color: #646262;
