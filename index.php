@@ -28,7 +28,7 @@ if ($db_name == "") {
             <?php
             if ($db_name != "") {
                 if (!file_exists($db_name)) {
-                    $db_name = ""; // activated for not create db
+                    $db_name = ""; // comment for create new db
                     if ($db_name != "") {
                         ?>
                         <script>
